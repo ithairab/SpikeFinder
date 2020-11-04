@@ -1,0 +1,71 @@
+function SF_PlotSpikes(handles, Type, i)
+
+global Record Params
+
+if Params.Motion.Blind ==0 || i
+    PlotWhatList = get(handles.popupmenu_PlotWhat, 'String');
+    PlotWhatID = get(handles.popupmenu_PlotWhat, 'Value');
+    if strcmpi(PlotWhatList{PlotWhatID}, 'Ratio')
+        R = Record.Trace.R;
+    elseif strcmpi(PlotWhatList{PlotWhatID}, 'Fluorescence')
+        R = Record.Trace.F;
+    end
+    Y = Record.Trace.Y;
+    C = Record.Trace.C;
+    T = Record.Trace.T;
+
+    eval(sprintf('EventInd = Record.%s.EventInd;', Type));
+    eval(sprintf('IndIn = Record.%s.IndIn;', Type));
+
+    if strcmp(Type, 'Events')
+        c = 'r';
+    elseif strcmp(Type, 'SubEvents')
+        c = 'g';
+    end
+    clStart = ['*' c];
+    clPeak = ['o', c];
+
+    % plotting
+    % --------
+    axes(handles.axes_YFP)
+    hold on
+    plot(T(EventInd(1,IndIn)), Y(EventInd(1,IndIn)), clStart);
+    plot(T(EventInd(2,IndIn)), Y(EventInd(2,IndIn)), clPeak);
+    axis off
+    xlim(Record.Axis.Lim(1:2))
+    % if Parameters.StimFlag
+    %     plot(repmat(Tall(StimStart), 2,1), [-1 1], 'r:')
+    %     plot(repmat(Tall(StimEnd), 2,1), [-1 1], 'g:')
+    % end
+
+    axes(handles.axes_CFP)
+    hold on
+    plot(T(EventInd(1,IndIn)), C(EventInd(1,IndIn)), clStart);
+    plot(T(EventInd(2,IndIn)), C(EventInd(2,IndIn)), clPeak);
+    axis off
+    xlim(Record.Axis.Lim(1:2))
+
+    axes(handles.axes_Ratio)
+    hold on
+    plot(T(EventInd(1,IndIn)), R(EventInd(1,IndIn)), clStart);
+    plot(T(EventInd(2,IndIn)), R(EventInd(2,IndIn)), clPeak);
+    if nargin == 3
+    %     text(T(EventInd(1,i)), R(EventInd(1,i))-10, '\uparrow', 'HorizontalAlignment', 'Center', 'Color', [0 0 1], 'FontWeight', 'demi')
+        text(T(EventInd(2,i)), R(EventInd(2,i)), '\downarrow', 'HorizontalAlignment', 'Center', 'Color', [0 0 1],...
+            'VerticalAlignment', 'Bottom', 'FontSize', 14)
+    end
+    if strcmpi(PlotWhatList{PlotWhatID}, 'Ratio')
+        axis(Record.Axis.Lim)
+    elseif strcmpi(PlotWhatList{PlotWhatID}, 'Fluorescence')
+        set(handles.axes_Ratio, 'XLim', Record.Axis.Lim(1:2))
+    end
+
+
+
+    % disp(RAmps(SpikeIDs));
+    % disp(sprintf('Mean spike amplitude = %2.2f', mean(RAmps(SpikeIDs))));
+    % disp(sprintf('Mean spike frequency = %2.2f spikes/min', length(SpikeIDs)/T(end)*60));
+    % 
+    % Rs = T(Spikes(SpikeIDs,1));
+    % Ms = T(MSpikes(:,2));
+end

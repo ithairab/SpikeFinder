@@ -1,0 +1,31 @@
+function SF_AnalyzeEvent(handles, i)
+
+global Record
+
+EventInd = Record.Events.EventInd;
+IndIn = Record.Events.IndIn;
+NumEvents = length(IndIn);
+T = Record.Trace.T;
+R = Record.Trace.R;
+F = Record.Trace.F;
+R0 = Record.Trace.R0;
+BL = Record.Trace.BL;
+RStart = R(EventInd(1, IndIn));
+
+ind_strt = Record.Events.Analyzed.StrtInd(i);
+ind_peak = Record.Events.Analyzed.PeakInd(i);
+ind = ind_strt:ind_peak; % start to end
+r = R0(ind);
+f = F(ind);
+t = T(ind);
+ampstrt = r(end) - r(1); % difference between ratio changes relative to start of trace
+ampstrt0 = (f(end) - f(1))/f(1)*100; % ratio change relative to start of spike
+dt0 = 60*(t(end)-t(1)); % time from spike start to spike peak in sec
+Record.Events.Analyzed.AmpStrt(i) = ampstrt;
+Record.Events.Analyzed.AmpStrt0(i) = ampstrt0;
+Record.Events.Analyzed.ClimbRate(i) = ampstrt0 / dt0;
+if i<NumEvents
+    Record.Events.Analyzed.ISI(i) = T(ind_nxt) - T(ind_strt);
+end
+
+Record.Events.EventInd(2,IndIn(i)) = Record.Events.Analyzed.PeakInd(i);
